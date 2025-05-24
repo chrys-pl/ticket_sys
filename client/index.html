@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ticket Submission</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="data:,">
+</head>
+<body>
+    <div class="container">
+        <h1>Submit a Ticket</h1>
+        <form id="ticketForm">
+            <div class="form-group">
+                <label for="name">Your Name:</label>
+                <input type="text" id="name" name="name" placeholder="Your Name" required />
+            </div>
+            <div class="form-group">
+                <label for="message">Issue Description:</label>
+                <textarea id="message" name="message" placeholder="Describe your issue" required rows="5"></textarea>
+            </div>
+            <button type="submit">Submit Ticket</button>
+        </form>
+        <p id="responseMsg"></p>
+    </div>
+
+    <script>
+        // DEBUG: Add console logging
+        console.log('🔧 DEBUG: Client-side script loaded');
+        console.log('🔧 DEBUG: Current page URL:', window.location.href);
+        
+        const form = document.getElementById("ticketForm");
+        const responseMsg = document.getElementById("responseMsg");
+
+        // DEBUG: Check if elements exist
+        console.log('🔧 DEBUG: Form element found:', !!form);
+        console.log('🔧 DEBUG: Response message element found:', !!responseMsg);
+
+        if (!form) {
+            console.error('❌ ERROR: Form element not found!');
+            return;
+        }
+
+        form.addEventListener("submit", async (e) => {
+            console.log('🔧 DEBUG: Form submission started');
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            const payload = Object.fromEntries(formData.entries());
+            console.log('🔧 DEBUG: Form data:', payload);
+            
+            try {
+                console.log('🔧 DEBUG: Sending request to /api/tickets');
+                const res = await fetch("/api/tickets", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                
+                console.log('🔧 DEBUG: Response status:', res.status);
+                const data = await res.json();
+                console.log('🔧 DEBUG: Response data:', data);
+                
+                responseMsg.textContent = data.message || data.error;
+                responseMsg.className = res.ok ? 'success' : 'error';
+                
+                if (res.ok) {
+                    form.reset();
+                    console.log('🔧 DEBUG: Form reset after successful submission');
+                }
+            } catch (error) {
+                console.error('❌ ERROR: Fetch failed:', error);
+                responseMsg.textContent = "Error submitting ticket. Please try again.";
+                responseMsg.className = 'error';
+            }
+        });
+
+        // DEBUG: Test if CSS is loading
+        window.addEventListener('load', () => {
+            const computedStyle = window.getComputedStyle(document.body);
+            console.log('🔧 DEBUG: Body background color:', computedStyle.backgroundColor);
+            console.log('🔧 DEBUG: CSS appears to be loaded');
+        });
+    </script>
+</body>
+</html>
+
+
