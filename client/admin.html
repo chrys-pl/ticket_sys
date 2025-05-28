@@ -1,19 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Login</title>
+  <title>Admin Dashboard</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h2>Admin Login</h2>
-  <form id="login-form">
-    <input type="text" id="username" placeholder="Username" required />
-    <input type="password" id="password" placeholder="Password" required />
-    <button type="submit">Login</button>
-  </form>
-  <p id="login-status"></p>
+  <div id="userBox" style="position: absolute; top: 15px; right: 20px; font-weight: bold;"></div>
+
+  <div class="container">
+    <h1>Admin Ticket Dashboard</h1>
+    <h2 style="text-align: center; margin-top: 20px;">View Tickets</h2>
+    <div id="ticketListWrapper">
+      <div id="ticketList">Loading...</div>
+    </div>
+  </div>
+
   <script src="admin.js"></script>
 </body>
 </html>
+
+
