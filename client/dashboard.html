@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Client Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="dashboard">
+    <div class="ticket-list">
+      <h2>Your Submitted Tickets</h2>
+      <div id="userInfo"></div>
+      <div id="clientTickets">Loading...</div>
+    </div>
+
+    <div class="ticket-form">
+      <h2>Submit a New Ticket</h2>
+      <form id="ticketForm">
+        <div class="form-group">
+          <label for="name">Your Name:</label>
+          <input type="text" id="name" name="name" required readonly />
+        </div>
+        <div class="form-group">
+          <label for="message">Issue Description:</label>
+          <textarea id="message" name="message" required rows="5"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="facility">Facility:</label>
+          <select id="facility" name="facility" required>
+            <option value="">Select a Facility</option>
+            <option value="ALCOTT REHAB">ALCOTT REHAB</option>
+            <option value="ANAHEIM HEALTHCARE">ANAHEIM HEALTHCARE</option>
+            <option value="CITRUS NURSING">CITRUS NURSING</option>
+          </select>
+        </div>
+        <button type="submit">Submit Ticket</button>
+      </form>
+      <p id="responseMsg"></p>
+    </div>
+  </div>
+
+  <script>
+    async function fetchClientTickets() {
+      const res = await fetch("/api/client-tickets", { credentials: "include" });
+      const tickets = await res.json();
+      const container = document.getElementById("clientTickets");
+      container.innerHTML = "";
+
+      if (tickets.length === 0) {
+        container.innerHTML = "<p>No tickets submitted yet.</p>";
+        return;
+      }
+
+      tickets.forEach(ticket => {
+        const div = document.createElement("div");
+        div.className = "ticket";
+        div.innerHTML = `
+          <p><strong>#${ticket.id}</strong> - ${ticket.facility}</p>
+          <p>Status: <strong>${ticket.status}</strong></p>
+          <details>
+            <summary>Message</summary>
+            <p>${ticket.message}</p>
+          </details>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      try {
+        const res = await fetch("/api/me", { credentials: "include" });
+        const user = await res.json();
+        document.getElementById("userInfo").textContent = `Logged in as: ${user.username}`;
+        document.getElementById("name").value = user.username;
+        fetchClientTickets();
+
+        const eventSource = new EventSource("/events", { withCredentials: true });
+        eventSource.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          if (data.type === "ticket-update") fetchClientTickets();
+        };
+      } catch (err) {
+        window.location.href = "/client-login.html";
+      }
+    });
+
+    document.getElementById("ticketForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const payload = Object.fromEntries(formData.entries());
+
+      const res = await fetch("/api/client-submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      const msg = document.getElementById("responseMsg");
+      msg.textContent = data.message || data.error;
+      msg.className = res.ok ? "success" : "error";
+
+      if (res.ok) {
+        document.getElementById("message").value = "";
+        document.getElementById("facility").value = "";
+        fetchClientTickets();
+      }
+    });
+  </script>
+</body>
+</html>
+
+

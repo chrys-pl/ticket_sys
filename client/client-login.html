@@ -1,0 +1,43 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Client Login</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Client Login</h1>
+    <form id="client-login-form">
+      <input type="text" id="client-username" placeholder="Username" required />
+      <input type="password" id="client-password" placeholder="Password" required />
+      <button type="submit">Login</button>
+    </form>
+    <p id="client-login-status"></p>
+  </div>
+  <script>
+    document.getElementById("client-login-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username = document.getElementById("client-username").value.trim();
+      const password = document.getElementById("client-password").value.trim();
+
+      const res = await fetch("/api/client-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ username, password })
+      });
+
+      const data = await res.json();
+      const statusMsg = document.getElementById("client-login-status");
+
+      if (res.ok) {
+        window.location.href = "/dashboard.html";
+      } else {
+        statusMsg.textContent = data.message || "Login failed.";
+        statusMsg.className = "error";
+      }
+    });
+  </script>
+</body>
+</html>
+

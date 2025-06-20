@@ -1,24 +1,44 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Admin Login</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
   <div class="container">
     <h1>Admin Login</h1>
-    <form id="login-form">
-      <input type="text" id="username" placeholder="Username" required />
-      <input type="password" id="password" placeholder="Password" required />
+    <form id="admin-login-form">
+      <input type="text" id="admin-username" placeholder="Username" required />
+      <input type="password" id="admin-password" placeholder="Password" required />
       <button type="submit">Login</button>
     </form>
-    <p id="login-status"></p>
+    <p id="admin-login-status"></p>
   </div>
-  <script src="admin.js"></script>
-</body>
+  <script>
+    document.getElementById("admin-login-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username = document.getElementById("admin-username").value.trim();
+      const password = document.getElementById("admin-password").value.trim();
 
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ username, password })
+      });
+
+      const data = await res.json();
+      const statusMsg = document.getElementById("admin-login-status");
+
+      if (res.ok) {
+        window.location.href = "/admin";
+      } else {
+        statusMsg.textContent = data.message || "Login failed.";
+        statusMsg.className = "error";
+      }
+    });
+  </script>
+</body>
 </html>
 
